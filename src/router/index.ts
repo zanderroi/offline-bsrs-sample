@@ -9,7 +9,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/folder/:id',
-    component: () => import ('../views/FolderPage.vue')
+    component: () => import ('../views/FolderPage.vue'),
+    meta: { requiresAuth: true } 
   },
   {
     path: '/login',
@@ -22,4 +23,17 @@ const router = createRouter({
   routes
 })
 
-export default router
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('token');
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Redirect to login if not authenticated
+    next('/login');
+  } else {
+    // Proceed to the route
+    next();
+  }
+});
+
+export default router;

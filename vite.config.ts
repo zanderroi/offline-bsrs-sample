@@ -19,5 +19,15 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom'
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://staging-bsrs.tesda.gov.ph',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
   }
+  
 })

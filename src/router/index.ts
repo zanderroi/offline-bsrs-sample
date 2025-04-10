@@ -1,21 +1,34 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Login from '../views/Login.vue';
+import Home from '../views/Home.vue';
+import DefaultLayout from '../layouts/default.vue';
 
 const routes: Array<RouteRecordRaw> = [
-  {
-    path: '',
-    redirect: '/folder/Inbox'
-  },
-  {
-    path: '/folder/:id',
-    component: () => import ('../views/FolderPage.vue'),
-    meta: { requiresAuth: true } 
-  },
+  // {
+  //   path: '',
+  //   redirect: '/folder/Inbox'
+  // },
+  // {
+  //   path: '/folder/:id',
+  //   component: () => import ('../views/FolderPage.vue'),
+  //   meta: { requiresAuth: true } 
+  // },
   {
     path: '/login',
     component: Login,
   },
+  {
+    path: '/',
+    component: DefaultLayout,
+    children: [
+      {
+        path: "",
+        name: 'Home',
+        component: Home,
+      }
+    ]
+  }
 ]
 
 const router = createRouter({

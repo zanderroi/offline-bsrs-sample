@@ -65,10 +65,7 @@ const router = useRouter();
 const login = async () => {
   error.value = "";
   try {
-    // console.log("Sending login payload:", {
-    //   email: email.value,
-    //   password: password.value
-    // });
+
     const response = await axios.post("/api/auth/login", {
       email: email.value,
       password: password.value,
@@ -84,6 +81,25 @@ const login = async () => {
   } catch (err) {
     console.error("Login error:", err.response || err.message);
     error.value = err.response?.data?.message || "Invalid email or password";
+  }
+};
+
+const registerDevice = async (deviceId, licenseKey) => {
+  try {
+    const response = await axios.post('/api/offline/activate-key', {
+      device_id: deviceId,
+      license_key: licenseKey,
+    });
+
+    if (response.data.status) {
+      localStorage.setItem('device_id', deviceId);
+      localStorage.setItem('app_key', response.data.app_key);  // Assuming app_key is returned by the server
+      console.log('Device registered and paired with license key');
+    } else {
+      console.error('Failed to pair device:', response.data.message);
+    }
+  } catch (err) {
+    console.error('Error registering device:', err.response?.data || err.message);
   }
 };
 </script>

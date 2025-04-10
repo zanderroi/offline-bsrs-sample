@@ -20,10 +20,12 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/',
+    redirect: '/home',
     component: DefaultLayout,
+    meta: { requiresAuth: true },
     children: [
       {
-        path: "",
+        path: 'home',
         name: 'Home',
         component: Home,
       }

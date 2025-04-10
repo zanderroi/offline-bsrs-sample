@@ -14,6 +14,10 @@
             <ion-icon :icon="settingsOutline" />
             <ion-label>Settings</ion-label>
           </ion-tab-button>
+          <ion-tab-button @click="logout">
+            <ion-icon :icon="logOutOutline" />
+            <ion-label>Logout</ion-label>
+          </ion-tab-button>
         </ion-tab-bar>
       </ion-tabs>
     </ion-content>
@@ -31,15 +35,21 @@ import {
   IonIcon,
   IonLabel,
 } from "@ionic/vue";
-import { heart, calendar, musicalNote, settingsOutline } from 'ionicons/icons';
-</script>
+import { heart, settingsOutline, logOutOutline } from 'ionicons/icons';
+import { useRouter } from "vue-router";
+import axios from "axios";
+import api from "@/axios";
 
-<style scoped>
-/* Ensure the footer stays at the bottom */
-ion-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 10;
+const router = useRouter(); 
+
+
+const logout = async () => {
+  try {
+    await api.get("/auth/logout")
+    localStorage.removeItem("token")
+    router.push("/login")
+  } catch (err) {
+    console.error("Logout error:", err)
+  }
 }
-</style>
+</script>

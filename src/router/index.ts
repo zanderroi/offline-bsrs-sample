@@ -1,22 +1,20 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
+import { Preferences } from '@capacitor/preferences';
 import Login from '../views/Login.vue';
 import Home from '../views/Home.vue';
 import DefaultLayout from '../layouts/default.vue';
+import LicenseKey from '../views/LicenseKey.vue';
 
 const routes: Array<RouteRecordRaw> = [
-  // {
-  //   path: '',
-  //   redirect: '/folder/Inbox'
-  // },
-  // {
-  //   path: '/folder/:id',
-  //   component: () => import ('../views/FolderPage.vue'),
-  //   meta: { requiresAuth: true } 
-  // },
+
   {
     path: '/login',
     component: Login,
+  },
+  {
+    path: '/license',
+    component: LicenseKey
   },
   {
     path: '/',
@@ -39,10 +37,10 @@ const router = createRouter({
 })
 
 
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('token');
+router.beforeEach(async (to, from, next) => {
+  const { value: token } = await Preferences.get({ key: 'token' });
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  if (to.meta.requiresAuth && !token) {
     // Redirect to login if not authenticated
     next('/login');
   } else {

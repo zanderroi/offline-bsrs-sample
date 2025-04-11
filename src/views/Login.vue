@@ -1,28 +1,37 @@
 <template>
-  <ion-page style="background-color: blue;">
+  <ion-page style="background-color: blue">
     <ion-grid>
       <ion-row>
         <ion-col>
-          <ion-card>
-            <img :src="`/img/tesdalogo.png`" class="logo" alt="TESDA Logo">
+          <ion-card class="mb-2">
+            <img :src="`/img/tesdalogo.png`" class="logo" alt="TESDA Logo" />
             <ion-card-header>
-              <ion-card-title style="font-size: medium;">BSRS Offline</ion-card-title>
-              <ion-card-subtitle style="font-size: small;">Welcome back! Please enter your
-                credentials.</ion-card-subtitle>
+              <ion-card-title style="font-size: medium">BSRS Offline</ion-card-title>
+              <ion-card-subtitle style="font-size: small"
+                >Welcome back! Please enter your credentials.</ion-card-subtitle
+              >
             </ion-card-header>
 
             <ion-card-content>
-              <ion-label position="floating" style="font-size: small;">Email</ion-label>
-              <ion-input class="input" v-model="email" type="email" required></ion-input>
+              <ion-label position="floating" style="font-size: small">Email</ion-label>
+              <ion-input class="input shadow-sm bg-gray-100" v-model="email" type="email" required></ion-input>
 
-              <ion-label position="floating" style="font-size: small;">Password</ion-label>
-              <ion-input class="input" v-model="password" type="password" required>
+              <ion-label position="floating" style="font-size: small">Password</ion-label>
+              <ion-input class="input shadow-sm bg-gray-100" v-model="password" type="password" required>
                 <ion-input-password-toggle slot="end"></ion-input-password-toggle>
               </ion-input>
 
-              <ion-button expand="block" @click="login" style="font-size: small;">Login</ion-button>
+              <ion-button expand="block" @click="login" class="mt-4" style="font-size: small"
+                >Login</ion-button
+              >
             </ion-card-content>
           </ion-card>
+
+          <div class="px-6" v-if="!isCheckingKey && !hasLicenseKey">
+            <router-link to="/license" class="ion-activatable ripple-parent">
+              Link Device
+            </router-link>
+          </div>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -30,9 +39,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { Preferences } from "@capacitor/preferences";
 import {
   IonPage,
   IonHeader,
@@ -53,7 +63,7 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonInputPasswordToggle
+  IonInputPasswordToggle,
 } from "@ionic/vue";
 
 const email = ref("");
@@ -61,45 +71,31 @@ const password = ref("");
 const error = ref("");
 const router = useRouter();
 
+const hasLicenseKey = ref(false);
+const isCheckingKey = ref(true);
+
+onMounted(async () => {
+  const { value } = await Preferences.get({ key: "license_key" });
+  hasLicenseKey.value = !!value;
+  isCheckingKey.value = false; // now done checking
+});
 
 const login = async () => {
   error.value = "";
   try {
-
     const response = await axios.post("/api/auth/login", {
       email: email.value,
       password: password.value,
     });
 
-
     const token = response.data.access_token;
-   // console.log('Token:', token);
-
-    localStorage.setItem("token", token);
+    // console.log('Token:', token);
+    await Preferences.set({ key: "token", value: token });
 
     router.push("/");
   } catch (err) {
     console.error("Login error:", err.response || err.message);
     error.value = err.response?.data?.message || "Invalid email or password";
-  }
-};
-
-const registerDevice = async (deviceId, licenseKey) => {
-  try {
-    const response = await axios.post('/api/offline/activate-key', {
-      device_id: deviceId,
-      license_key: licenseKey,
-    });
-
-    if (response.data.status) {
-      localStorage.setItem('device_id', deviceId);
-      localStorage.setItem('app_key', response.data.app_key);  // Assuming app_key is returned by the server
-      console.log('Device registered and paired with license key');
-    } else {
-      console.error('Failed to pair device:', response.data.message);
-    }
-  } catch (err) {
-    console.error('Error registering device:', err.response?.data || err.message);
   }
 };
 </script>
@@ -109,7 +105,6 @@ const registerDevice = async (deviceId, licenseKey) => {
   border-radius: 5px;
   border-color: gray;
 }
-
 
 ion-card {
   background-color: #fff;

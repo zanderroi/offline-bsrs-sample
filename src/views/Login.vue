@@ -35,6 +35,11 @@
         </ion-col>
       </ion-row>
     </ion-grid>
+    <IonLoading
+        :is-open="isLoading"
+        message="Logging in, please wait..."
+        spinner="crescent"
+      />
   </ion-page>
 </template>
 
@@ -73,6 +78,7 @@ const router = useRouter();
 
 const hasLicenseKey = ref(false);
 const isCheckingKey = ref(true);
+const isLoading = ref(false);
 
 onMounted(async () => {
   const { value } = await Preferences.get({ key: "license_key" });
@@ -83,15 +89,17 @@ onMounted(async () => {
 const login = async () => {
   error.value = "";
   try {
+    isLoading.value = true;
     const response = await axios.post("/api/auth/login", {
       email: email.value,
       password: password.value,
     });
-
+    if (response.status !== 200) {
+      throw new Error("Login failed");
+    }
     const token = response.data.access_token;
-    // console.log('Token:', token);
     await Preferences.set({ key: "token", value: token });
-
+    isLoading.value = false;
     router.push("/");
   } catch (err) {
     console.error("Login error:", err.response || err.message);

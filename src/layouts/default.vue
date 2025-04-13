@@ -35,21 +35,35 @@ import {
   IonIcon,
   IonLabel,
 } from "@ionic/vue";
-import { heart, settingsOutline, logOutOutline } from 'ionicons/icons';
+import { heart, settingsOutline, logOutOutline } from "ionicons/icons";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import api from "@/axios";
+import { Preferences } from "@capacitor/preferences";
 
-const router = useRouter(); 
-
+const router = useRouter();
 
 const logout = async () => {
   try {
-    await api.get("/auth/logout")
-    localStorage.removeItem("token")
-    router.push("/login")
+    const { value: token } = await Preferences.get({ key: "token" });
+
+    if (!token) {
+      console.error("No token found. Cannot log out.");
+      return;
+    }
+
+    await axios.get(
+      "/auth/logout",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+      }
+    );
+    await Preferences.clear();
+    router.push("/login");
   } catch (err) {
-    console.error("Logout error:", err)
+    console.error("Logout error:", err);
   }
-}
+};
 </script>

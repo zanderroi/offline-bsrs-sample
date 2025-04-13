@@ -2,15 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <!-- Back to Login Link -->
-        <ion-buttons slot="start">
-          <router-link to="/login" class="ion-activatable ripple-parent">
-            <ion-button fill="clear" class="flex items-center">
-              <ion-icon :icon="arrowBack" slot="start" size="small" />
-              <span>Back to Login</span>
-            </ion-button>
-          </router-link>
-        </ion-buttons>
+        <ion-title>BSRS OFFLINE</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -77,7 +69,6 @@ import {
 import { syncCircleSharp, arrowBack } from "ionicons/icons";
 import { Device } from "@capacitor/device";
 import { Preferences } from "@capacitor/preferences";
-
 // Reactive variables
 const licenseKey = ref("");
 const deviceModel = ref(""); // To store the device model
@@ -140,7 +131,7 @@ const handleSubmit = async () => {
   const success = await registerDevice(deviceId, licenseKey.value);
   isLoading.value = false;
   if (success) {
-    router.push("/success"); // Navigate to success page
+    router.push("/login"); // Navigate to success page
   }
 };
 

@@ -10,6 +10,7 @@ const routes: Array<RouteRecordRaw> = [
 
   {
     path: '/login',
+    name: 'Login',
     component: Login,
   },
   {
@@ -39,14 +40,29 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const { value: token } = await Preferences.get({ key: 'token' });
+  const { value: licenseKey } = await Preferences.get({ key: 'license_key' });
 
-  if (to.meta.requiresAuth && !token) {
-    // Redirect to login if not authenticated
-    next('/login');
-  } else {
-    // Proceed to the route
-    next();
+  // Redirect to /license if licenseKey is not set
+  if (!licenseKey && to.path !== '/license') {
+    next('/license');
+    return;
   }
+
+  // Redirect to /login if the route requires authentication and no token is present
+  if (to.meta.requiresAuth && !token) {
+    next('/login');
+    return;
+  }
+
+
+  // Redirect to /home if the user is already logged in and tries to access /login
+  if (to.path === '/login' && token) {
+    next('/home');
+    return;
+  }
+
+  // Allow access to the route
+  next();
 });
 
 export default router;

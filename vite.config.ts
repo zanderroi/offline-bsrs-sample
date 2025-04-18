@@ -16,18 +16,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    outDir: 'dist', // Set the build output directory
+  },
   test: {
     globals: true,
     environment: 'jsdom'
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://staging-bsrs.tesda.gov.ph',
-        changeOrigin: true,
-        rewrite: (path) => path,
-      }
-    }
-  }
   
 })

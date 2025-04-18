@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Offline BSRS</string>
+    <string name="title_activity_main">Offline BSRS</string>
+    <string name="package_name">ph.tesda.offlinebsrs</string>
+    <string name="custom_url_scheme">ph.tesda.offlinebsrs</string>
+</resources>

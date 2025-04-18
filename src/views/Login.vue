@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
+import { api, capacitorHttpRequest } from "@/axios";
 import { useRouter } from "vue-router";
 import { Preferences } from "@capacitor/preferences";
 import {
@@ -69,7 +69,10 @@ import {
   IonRow,
   IonCol,
   IonInputPasswordToggle,
+  IonLoading
 } from "@ionic/vue";
+
+import { initDB, saveUserData } from '@/services/sqliteService';
 
 const email = ref("");
 const password = ref("");
@@ -90,20 +93,33 @@ const login = async () => {
   error.value = "";
   try {
     isLoading.value = true;
-    const response = await axios.post("/api/auth/login", {
+
+    const response = await capacitorHttpRequest('POST', "/auth/login", {
       email: email.value,
       password: password.value,
     });
-    if (response.status !== 200) {
-      throw new Error("Login failed");
+
+    if (response?.status !== 200) {
+      throw new Error(response?.data?.message || "Login failed");
     }
-    const token = response.data.access_token;
+
+    const token = response?.data?.access_token;
+    const user = response?.data?.user;
+
+    if (!token || !user) {
+      throw new Error("Invalid response from server");
+    }
+
     await Preferences.set({ key: "token", value: token });
-    isLoading.value = false;
+    await initDB();
+    await saveUserData(user);
+
     router.push("/");
   } catch (err) {
-    console.error("Login error:", err.response || err.message);
-    error.value = err.response?.data?.message || "Invalid email or password";
+    console.error("Login error:", err.message || "Unknown error");
+    error.value = err?.message || "Invalid email or password";
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

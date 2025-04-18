@@ -37,14 +37,32 @@ import {
 } from "@ionic/vue";
 import { heart, settingsOutline, logOutOutline } from "ionicons/icons";
 import { useRouter } from "vue-router";
-import axios from "axios";
-import api from "@/axios";
+import { api, capacitorHttpRequest } from "@/axios";
 import { Preferences } from "@capacitor/preferences";
-
+import { ref, onMounted } from "vue";
+import { getDB } from "@/services/sqliteService";
 const router = useRouter();
+const user = ref(null);
+
+// const loadUser = async () => {
+//   try {
+//     const db = await getDB();
+//     const result = await db.query("SELECT * FROM users LIMIT 1");
+//     if (result.values && result.values.length > 0) {
+//       user.value = result.values[0];
+//     }
+//   } catch (error) {
+//     console.error("Failed to load user:", error);
+//   }
+// };
+
+// onMounted(() => {
+//   loadUser();
+// });
 
 const logout = async () => {
   try {
+    // Retrieve the token from Preferences
     const { value: token } = await Preferences.get({ key: "token" });
 
     if (!token) {
@@ -52,18 +70,18 @@ const logout = async () => {
       return;
     }
 
-    await axios.get(
-      "/auth/logout",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, 
-        },
-      }
-    );
-    await Preferences.clear();
+    // Make the logout request using Capacitor HTTP
+    await capacitorHttpRequest("GET", "/auth/logout", {}, {
+      Authorization: `Bearer ${token}`, // Add the Authorization header
+    });
+
+    // Clear only the token from Preferences
+    await Preferences.remove({ key: "token" });
+
+    // Navigate to the login page
     router.push("/login");
   } catch (err) {
-    console.error("Logout error:", err);
+    console.error("Logout error:", err.message || "Unknown error");
   }
 };
 </script>

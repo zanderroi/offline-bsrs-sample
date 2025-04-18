@@ -1,9 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'myApp',
-  webDir: 'dist'
+  appId: 'ph.tesda.offlinebsrs',
+  appName: 'Offline BSRS',
+  webDir: 'dist',
+  bundledWebRuntime: false,
+  plugins: {
+    CapacitorSQLite: {
+      androidDatabaseLocation: 'default'
+    }
+  }
 };
 
 export default config;

@@ -41,7 +41,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { api, capacitorHttpRequest } from "@/axios";
 import { useRouter } from "vue-router";
 import {
   IonPage,
@@ -65,6 +65,7 @@ import {
   IonCol,
   IonLoading,
 } from "@ionic/vue";
+
 
 import { syncCircleSharp, arrowBack } from "ionicons/icons";
 import { Device } from "@capacitor/device";
@@ -100,23 +101,28 @@ const generateDeviceId = async () => {
 const registerDevice = async (deviceId, licenseKey) => {
   try {
     console.log("Registering device with ID:", deviceId);
-    const response = await axios.post("/api/offline/license", {
+
+    // Make the HTTP request using the Capacitor HTTP plugin
+    const response = await capacitorHttpRequest('POST', "/offline/license", {
       device_id: deviceId,
       license_key: licenseKey,
     });
 
-    if (response.data.status) {
+    // Check the response status
+    if (response?.status === 200 && response?.data?.status) {
+      // Save device ID and license key to Preferences
       await Preferences.set({ key: "device_id", value: deviceId });
       await Preferences.set({ key: "license_key", value: licenseKey });
 
       console.log("Device registered and paired with license key");
       return true;
     } else {
-      console.error("Failed to pair device:", response.data.message);
+      console.error("Failed to pair device:", response?.data?.message || "Unknown error");
       return false;
     }
   } catch (err) {
-    console.error("Error registering device:", err.response?.data || err.message);
+    // Handle errors from the Capacitor HTTP plugin
+    console.error("Error registering device:", err.message || "Unknown error");
     return false;
   }
 };
